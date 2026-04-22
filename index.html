@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>מאמן מתמטיקה</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0f0f1a;
+    --card: #1a1a2e;
+    --card-hover: #222240;
+    --primary: #7c5cfc;
+    --primary-light: #9d85fc;
+    --success: #22c55e;
+    --error: #ef4444;
+    --warning: #f59e0b;
+    --text: #e8e8f0;
+    --text-dim: #8888a8;
+    --border: #2a2a45;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    min-height: 100dvh;
+    direction: rtl;
+    -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
+  }
+
+  .container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    padding: 30px 0 20px;
+  }
+
+  .header h1 {
+    font-size: 2rem;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+
+  .header p {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+  }
+
+  /* Stats Bar */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+    transition: transform 0.2s;
+  }
+
+  .stat-card .value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-light);
+  }
+
+  .stat-card .label {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  .stat-card.streak .value { color: var(--warning); }
+  .stat-card.accuracy .value { color: var(--success); }
+
+  /* Combo bar */
+  .combo-bar {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 16px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s;
+  }
+
+  .combo-bar.hot {
+    border-color: var(--warning);
+    box-shadow: 0 0 20px rgba(245,158,11,0.1);
+  }
+
+  .combo-bar.fire {
+    border-color: var(--error);
+    box-shadow: 0 0 25px rgba(239,68,68,0.15);
+  }
+
+  .combo-label { font-size: 0.85rem; color: var(--text-dim); white-space: nowrap; }
+  .combo-value { font-weight: 700; font-size: 1.1rem; color: var(--warning); min-width: 40px; }
+
+  .combo-mult {
+    font-size: 0.8rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 700;
+    background: rgba(245,158,11,0.15);
+    color: var(--warning);
+    transition: all 0.3s;
+  }
+
+  .combo-mult.x2 { background: rgba(245,158,11,0.2); color: #fbbf24; }
+  .combo-mult.x3 { background: rgba(239,68,68,0.2); color: var(--error); }
+  .combo-mult.x4 { background: rgba(239,68,68,0.3); color: #f87171; }
+
+  .combo-progress {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .combo-progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s, background 0.3s;
+    background: var(--warning);
+  }
+
+  /* Level indicator */
+  .level-bar {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .level-bar .level-label {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  .level-bar .level-num {
+    font-weight: 700;
+    color: var(--primary-light);
+    font-size: 1.1rem;
+    min-width: 24px;
+    text-align: center;
+  }
+
+  .level-progress {
+    flex: 1;
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .level-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+
+  /* Operation selector */
+  .op-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+    justify-content: center;
+  }
+
+  .op-btn {
+    background: var(--card);
+    border: 2px solid var(--border);
+    color: var(--text);
+    padding: 8px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+  }
+
+  .op-btn:hover { border-color: var(--primary); background: var(--card-hover); }
+  .op-btn.active { border-color: var(--primary); background: rgba(124,92,252,0.15); color: var(--primary-light); }
+
+  .op-btn .op-level {
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    display: block;
+    margin-top: 2px;
+  }
+
+  /* Question area */
+  .question-card {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 40px 30px;
+    text-align: center;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s;
+  }
+
+  .question-card.correct {
+    border-color: var(--success);
+    box-shadow: 0 0 30px rgba(34,197,94,0.15);
+  }
+
+  .question-card.wrong {
+    border-color: var(--error);
+    box-shadow: 0 0 30px rgba(239,68,68,0.15);
+  }
+
+  .question-card.pop {
+    animation: popIn 0.3s ease;
+  }
+
+  @keyframes popIn {
+    0% { transform: scale(0.97); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .question-type {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+  }
+
+  .question-text {
+    font-size: 2.8rem;
+    font-weight: 700;
+    margin-bottom: 30px;
+    direction: ltr;
+    unicode-bidi: isolate;
+    letter-spacing: 2px;
+    transition: opacity 0.2s;
+  }
+
+  .question-text .op-symbol {
+    color: var(--primary-light);
+    margin: 0 8px;
+  }
+
+  .answer-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .answer-input {
+    flex: 1;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    color: var(--text);
+    font-size: 1.8rem;
+    text-align: center;
+    padding: 12px;
+    border-radius: 12px;
+    outline: none;
+    direction: ltr;
+    font-weight: 600;
+    transition: border-color 0.2s;
+  }
+
+  .answer-input:focus { border-color: var(--primary); }
+  .answer-input.correct-input { border-color: var(--success); }
+  .answer-input.wrong-input { border-color: var(--error); }
+  .answer-input:disabled { opacity: 0.5; }
+
+  .submit-btn {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    border: none;
+    color: #fff;
+    font-size: 1.1rem;
+    padding: 14px 24px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+
+  .submit-btn:hover { opacity: 0.9; }
+  .submit-btn:active { transform: scale(0.97); }
+  .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .skip-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    padding: 14px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .skip-btn:hover { border-color: var(--text-dim); color: var(--text); }
+  .skip-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* Feedback */
+  .feedback {
+    text-align: center;
+    min-height: 36px;
+    margin-bottom: 16px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: opacity 0.3s;
+  }
+
+  .feedback.correct-fb { color: var(--success); }
+  .feedback.wrong-fb { color: var(--error); }
+
+  /* XP popup */
+  .xp-popup {
+    position: fixed;
+    pointer-events: none;
+    font-weight: 800;
+    font-size: 1.4rem;
+    z-index: 100;
+    animation: xpFloat 1s ease-out forwards;
+  }
+
+  @keyframes xpFloat {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-60px) scale(1.3); }
+  }
+
+  /* Achievements */
+  .achievements-section {
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+
+  .achievements-title {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+  }
+
+  .achievements-title .toggle-arrow {
+    transition: transform 0.2s;
+    font-size: 0.7rem;
+  }
+
+  .achievements-title .toggle-arrow.open { transform: rotate(90deg); }
+
+  .achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s;
+  }
+
+  .achievements-grid.collapsed { max-height: 0; opacity: 0; }
+
+  .achievement {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+    transition: all 0.3s;
+    opacity: 0.4;
+  }
+
+  .achievement.unlocked {
+    opacity: 1;
+    border-color: var(--warning);
+    background: rgba(245,158,11,0.08);
+  }
+
+  .achievement .ach-icon { font-size: 1.4rem; margin-bottom: 4px; }
+  .achievement .ach-name { font-size: 0.7rem; color: var(--text-dim); }
+  .achievement.unlocked .ach-name { color: var(--text); }
+
+  /* Achievement toast */
+  .toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: var(--card);
+    border: 2px solid var(--warning);
+    border-radius: 14px;
+    padding: 14px 24px;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    direction: rtl;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .toast .toast-icon { font-size: 1.6rem; }
+  .toast .toast-text { font-size: 0.9rem; }
+  .toast .toast-name { font-weight: 700; color: var(--warning); }
+
+  /* Op Stats panel */
+  .stats-panel {
+    margin-bottom: 20px;
+  }
+
+  .stats-panel-title {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .stats-panel-title .toggle-arrow {
+    transition: transform 0.2s;
+    font-size: 0.7rem;
+  }
+
+  .stats-panel-title .toggle-arrow.open { transform: rotate(90deg); }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 8px;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s;
+  }
+
+  .stats-grid.collapsed { max-height: 0; opacity: 0; }
+
+  .op-stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+  }
+
+  .op-stat-card .op-stat-name {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .op-stat-card .op-stat-name .op-stat-lvl {
+    color: var(--primary-light);
+    font-weight: 600;
+  }
+
+  .op-stat-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+
+  .op-stat-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.4s;
+  }
+
+  .op-stat-card .op-stat-info {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* History */
+  .history-section { margin-top: 16px; }
+
+  .history-title {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    direction: ltr;
+  }
+
+  .history-item.h-correct { border-left: 3px solid var(--success); }
+  .history-item.h-wrong { border-left: 3px solid var(--error); }
+  .history-item .h-answer { color: var(--text-dim); font-size: 0.8rem; }
+
+  /* Timer */
+  .timer {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    direction: ltr;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Top bar */
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .back-btn, .reset-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 6px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+  }
+
+  .back-btn:hover, .reset-btn:hover { border-color: var(--primary); color: var(--text); }
+  .reset-btn { border-color: rgba(239,68,68,0.3); }
+  .reset-btn:hover { border-color: var(--error); color: var(--error); }
+
+  /* Confetti canvas */
+  #confetti {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 150;
+  }
+
+  /* Daily challenge */
+  .daily-section {
+    background: linear-gradient(135deg, rgba(124,92,252,0.1), rgba(157,133,252,0.05));
+    border: 1px solid rgba(124,92,252,0.3);
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+
+  .daily-title {
+    font-size: 0.85rem;
+    color: var(--primary-light);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .daily-progress-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .daily-progress-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .daily-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    border-radius: 4px;
+    transition: width 0.4s;
+  }
+
+  .daily-count {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    white-space: nowrap;
+    min-width: 50px;
+    text-align: left;
+    direction: ltr;
+  }
+
+  .daily-done {
+    color: var(--success);
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-top: 6px;
+  }
+
+  /* Start screen */
+  .start-screen {
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .start-btn {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+    padding: 16px 48px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+
+  .start-btn:hover { opacity: 0.9; }
+  .start-btn:active { transform: scale(0.97); }
+
+  /* Settings */
+  .settings-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .setting-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .setting-toggle:hover { border-color: var(--primary); }
+  .setting-toggle.active { border-color: var(--primary); color: var(--primary-light); }
+  .setting-toggle input { display: none; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ===== Mobile ===== */
+  @media (max-width: 500px) {
+    .container { padding: 10px; }
+    .header { padding: 16px 0 10px; }
+    .header h1 { font-size: 1.5rem; }
+
+    .stats-bar { grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 12px; }
+    .stat-card { padding: 10px 4px; border-radius: 10px; }
+    .stat-card .value { font-size: 1.2rem; }
+    .stat-card .label { font-size: 0.65rem; }
+
+    .combo-bar { padding: 8px 12px; margin-bottom: 12px; gap: 8px; }
+    .combo-value { font-size: 0.95rem; }
+
+    .level-bar { padding: 10px 14px; margin-bottom: 12px; gap: 10px; }
+    .op-selector { gap: 6px; margin-bottom: 12px; }
+    .op-btn { padding: 6px 12px; font-size: 0.8rem; border-radius: 8px; }
+
+    .question-card { padding: 28px 16px; margin-bottom: 14px; border-radius: 14px; }
+    .question-text { font-size: 2rem; margin-bottom: 24px; }
+    .answer-input { font-size: 1.4rem; padding: 10px; border-radius: 10px; }
+    .submit-btn { padding: 12px 18px; font-size: 1rem; border-radius: 10px; }
+    .skip-btn { padding: 12px 12px; font-size: 0.8rem; }
+
+    .feedback { font-size: 1rem; min-height: 28px; margin-bottom: 10px; }
+    .history-list { max-height: 150px; }
+    .history-item { padding: 8px 12px; font-size: 0.8rem; }
+
+    .achievements-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+    .achievement { padding: 8px; }
+    .achievement .ach-icon { font-size: 1.2rem; }
+
+    .daily-section { padding: 12px 14px; margin-bottom: 16px; }
+
+    .start-btn { font-size: 1.1rem; padding: 14px 40px; width: 100%; max-width: 300px; }
+  }
+
+  @media (max-width: 360px) {
+    .question-text { font-size: 1.6rem; }
+    .answer-input { font-size: 1.2rem; }
+    .stats-bar { grid-template-columns: repeat(2, 1fr); }
+    .answer-row { gap: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="confetti"></canvas>
+
+<!-- Achievement Toast -->
+<div class="toast" id="toast">
+  <span class="toast-icon" id="toastIcon"></span>
+  <div>
+    <div class="toast-name" id="toastName"></div>
+    <div class="toast-text" id="toastText"></div>
+  </div>
+</div>
+
+<div class="container" id="app">
+  <!-- Start Screen -->
+  <div class="start-screen" id="startScreen">
+    <div class="header">
+      <h1>מאמן מתמטיקה</h1>
+      <p>תרגול אישי שמתאים את עצמו לרמה שלך</p>
+    </div>
+
+    <div style="text-align: right; max-width: 400px; margin: 0 auto 30px;">
+      <p style="color: var(--text-dim); margin-bottom: 16px; font-size: 0.95rem;">בחר פעולות לתרגול:</p>
+      <div class="op-selector" id="startOps">
+        <button class="op-btn active" data-op="add">חיבור +</button>
+        <button class="op-btn active" data-op="sub">חיסור −</button>
+        <button class="op-btn active" data-op="mul">כפל ×</button>
+        <button class="op-btn active" data-op="div">חילוק ÷</button>
+        <button class="op-btn active" data-op="pct">אחוזים %</button>
+        <button class="op-btn active" data-op="pow">חזקות</button>
+        <button class="op-btn active" data-op="sqrt">שורשים √</button>
+        <button class="op-btn active" data-op="mixed">מעורב</button>
+      </div>
+    </div>
+
+    <div class="settings-row">
+      <label class="setting-toggle active" id="timerToggle">
+        <input type="checkbox" checked> טיימר
+      </label>
+    </div>
+
+    <button class="start-btn" id="startBtn">התחל לתרגל</button>
+  </div>
+
+  <!-- Game Screen -->
+  <div id="gameScreen" style="display:none;">
+    <div class="top-bar">
+      <button class="back-btn" id="backBtn">חזרה</button>
+      <button class="reset-btn" id="resetBtn">איפוס</button>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="value" id="totalStat">0</div>
+        <div class="label">תרגילים</div>
+      </div>
+      <div class="stat-card">
+        <div class="value" id="correctStat">0</div>
+        <div class="label">נכון</div>
+      </div>
+      <div class="stat-card streak">
+        <div class="value" id="streakStat">0</div>
+        <div class="label">רצף</div>
+      </div>
+      <div class="stat-card accuracy">
+        <div class="value" id="accuracyStat">-</div>
+        <div class="label">דיוק</div>
+      </div>
+    </div>
+
+    <!-- Combo -->
+    <div class="combo-bar" id="comboBar">
+      <span class="combo-label">רצף</span>
+      <span class="combo-value" id="comboValue">0</span>
+      <div class="combo-progress">
+        <div class="combo-progress-fill" id="comboFill" style="width:0%"></div>
+      </div>
+      <span class="combo-mult" id="comboMult">x1</span>
+    </div>
+
+    <!-- Daily -->
+    <div class="daily-section" id="dailySection">
+      <div class="daily-title" id="dailyTitle">אתגר יומי: 20 תרגילים נכונים</div>
+      <div class="daily-progress-row">
+        <div class="daily-progress-bar">
+          <div class="daily-progress-fill" id="dailyFill" style="width:0%"></div>
+        </div>
+        <span class="daily-count" id="dailyCount">0 / 20</span>
+      </div>
+      <div class="daily-done" id="dailyDone" style="display:none;"></div>
+    </div>
+
+    <div class="level-bar">
+      <span class="level-label">רמה</span>
+      <span class="level-num" id="levelNum">1</span>
+      <div class="level-progress">
+        <div class="level-progress-fill" id="levelFill" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <div class="op-selector" id="gameOps"></div>
+
+    <div class="question-card" id="questionCard">
+      <div class="timer" id="timer" style="display:none;">0.0s</div>
+      <div class="question-type" id="questionType"></div>
+      <div class="question-text" id="questionText"></div>
+      <div class="answer-row">
+        <input type="text" inputmode="decimal" class="answer-input" id="answerInput" autocomplete="off" placeholder="?">
+        <button class="submit-btn" id="submitBtn">שלח</button>
+        <button class="skip-btn" id="skipBtn">דלג</button>
+      </div>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <!-- Op Stats -->
+    <div class="stats-panel">
+      <div class="stats-panel-title" id="statsPanelToggle">
+        <span>ביצועים לפי פעולה</span>
+        <span class="toggle-arrow" id="statsArrow">◀</span>
+      </div>
+      <div class="stats-grid collapsed" id="statsGrid"></div>
+    </div>
+
+    <!-- Achievements -->
+    <div class="achievements-section">
+      <div class="achievements-title" id="achToggle">
+        <span>הישגים</span>
+        <span class="toggle-arrow" id="achArrow">◀</span>
+      </div>
+      <div class="achievements-grid collapsed" id="achGrid"></div>
+    </div>
+
+    <!-- History -->
+    <div class="history-section">
+      <div class="history-title">היסטוריה אחרונה</div>
+      <div class="history-list" id="historyList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const OPS = {
+  add:   { name: 'חיבור', symbol: '+' },
+  sub:   { name: 'חיסור', symbol: '−' },
+  mul:   { name: 'כפל', symbol: '×' },
+  div:   { name: 'חילוק', symbol: '÷' },
+  pct:   { name: 'אחוזים', symbol: '%' },
+  pow:   { name: 'חזקות', symbol: '^' },
+  sqrt:  { name: 'שורשים', symbol: '√' },
+  mixed: { name: 'מעורב', symbol: '~' },
+};
+
+const SAVE_KEY = 'math-trainer-v3';
+const XP_TO_LEVEL_UP = lvl => 3 + lvl;
+const WRONG_STREAK_TO_LEVEL_DOWN = 3;
+const MAX_LEVEL = 10;
+const DAILY_GOAL = 20;
+const COMBO_THRESHOLDS = [3, 7, 15]; // x2, x3, x4
+
+// --- Achievements definition ---
+const ACHIEVEMENTS = [
+  { id: 'first',      icon: '🎯', name: 'התחלה',      desc: 'תרגיל ראשון נכון',        check: s => s.correct >= 1 },
+  { id: 'streak5',    icon: '🔥', name: 'רצף 5',      desc: '5 נכונים ברצף',           check: s => s.bestStreak >= 5 },
+  { id: 'streak10',   icon: '💥', name: 'רצף 10',     desc: '10 נכונים ברצף',          check: s => s.bestStreak >= 10 },
+  { id: 'streak25',   icon: '⚡', name: 'רצף 25',     desc: '25 נכונים ברצף',          check: s => s.bestStreak >= 25 },
+  { id: 'streak50',   icon: '🌟', name: 'רצף 50',     desc: '50 נכונים ברצף',          check: s => s.bestStreak >= 50 },
+  { id: 'total10',    icon: '📝', name: '10 תרגילים',  desc: 'פתרת 10 תרגילים',        check: s => s.total >= 10 },
+  { id: 'total50',    icon: '📚', name: '50 תרגילים',  desc: 'פתרת 50 תרגילים',        check: s => s.total >= 50 },
+  { id: 'total100',   icon: '🏅', name: '100 תרגילים', desc: 'פתרת 100 תרגילים',       check: s => s.total >= 100 },
+  { id: 'total500',   icon: '👑', name: '500 תרגילים', desc: 'פתרת 500 תרגילים',       check: s => s.total >= 500 },
+  { id: 'lvl3',       icon: '📈', name: 'רמה 3',      desc: 'הגעת לרמה 3 בפעולה כלשהי', check: s => Object.values(s.levels).some(l => l >= 3) },
+  { id: 'lvl5',       icon: '🚀', name: 'רמה 5',      desc: 'הגעת לרמה 5 בפעולה כלשהי', check: s => Object.values(s.levels).some(l => l >= 5) },
+  { id: 'lvl7',       icon: '💎', name: 'רמה 7',      desc: 'הגעת לרמה 7 בפעולה כלשהי', check: s => Object.values(s.levels).some(l => l >= 7) },
+  { id: 'lvl10',      icon: '🏆', name: 'רמה 10',     desc: 'הגעת לרמה 10!',           check: s => Object.values(s.levels).some(l => l >= 10) },
+  { id: 'acc90',      icon: '🎖️', name: 'דיוק 90%',   desc: '90%+ דיוק (מינ׳ 20)',     check: s => s.total >= 20 && (s.correct / s.total) >= 0.9 },
+  { id: 'daily',      icon: '📅', name: 'אתגר יומי',   desc: 'השלמת אתגר יומי',         check: s => s.dailyCompleted > 0 },
+  { id: 'daily7',     icon: '🗓️', name: '7 ימים',     desc: '7 אתגרים יומיים',         check: s => s.dailyCompleted >= 7 },
+  { id: 'speed',      icon: '⏱️', name: 'מהיר',       desc: 'תשובה נכונה מתחת ל-2 שניות', check: s => s.fastAnswers >= 1 },
+  { id: 'speed10',    icon: '💨', name: 'ברק',        desc: '10 תשובות מתחת ל-2 שניות',  check: s => s.fastAnswers >= 10 },
+];
+
+const $ = id => document.getElementById(id);
+
+let state = loadState();
+let current = null;
+let timerInterval = null;
+let timerStart = 0;
+let isLocked = false;
+let recentQuestions = []; // avoid repeats
+
+// --- State ---
+
+function defaultState() {
+  return {
+    levels: { add:1, sub:1, mul:1, div:1, pct:1, pow:1, sqrt:1, mixed:1 },
+    xp: { add:0, sub:0, mul:0, div:0, pct:0, pow:0, sqrt:0, mixed:0 },
+    wrongStreak: { add:0, sub:0, mul:0, div:0, pct:0, pow:0, sqrt:0, mixed:0 },
+    opStats: {},
+    total: 0,
+    correct: 0,
+    streak: 0,
+    bestStreak: 0,
+    history: [],
+    selectedOps: ['add','sub','mul','div','pct','pow','sqrt','mixed'],
+    showTimer: true,
+    achievements: [],
+    dailyDate: null,
+    dailyCorrect: 0,
+    dailyCompleted: 0,
+    fastAnswers: 0,
+  };
+}
+
+function loadState() {
+  try {
+    const s = JSON.parse(localStorage.getItem(SAVE_KEY));
+    if (s && s.levels) {
+      const d = defaultState();
+      return { ...d, ...s, wrongStreak: s.wrongStreak || d.wrongStreak, opStats: s.opStats || {} };
+    }
+  } catch(e) {}
+  return defaultState();
+}
+
+function saveState() {
+  state.history = state.history.slice(-50);
+  localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+}
+
+function getOpStat(op) {
+  if (!state.opStats[op]) state.opStats[op] = { total: 0, correct: 0, totalTime: 0 };
+  return state.opStats[op];
+}
+
+// --- Daily challenge ---
+
+function todayStr() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function checkDaily() {
+  const today = todayStr();
+  if (state.dailyDate !== today) {
+    state.dailyDate = today;
+    state.dailyCorrect = 0;
+  }
+}
+
+function updateDailyUI() {
+  checkDaily();
+  const pct = Math.min(100, Math.round(state.dailyCorrect / DAILY_GOAL * 100));
+  $('dailyFill').style.width = pct + '%';
+  $('dailyCount').textContent = `${Math.min(state.dailyCorrect, DAILY_GOAL)} / ${DAILY_GOAL}`;
+
+  if (state.dailyCorrect >= DAILY_GOAL) {
+    $('dailyDone').style.display = 'block';
+    $('dailyDone').textContent = 'הושלם!';
+  } else {
+    $('dailyDone').style.display = 'none';
+  }
+}
+
+// --- Combo ---
+
+function getComboMultiplier() {
+  const s = state.streak;
+  if (s >= COMBO_THRESHOLDS[2]) return 4;
+  if (s >= COMBO_THRESHOLDS[1]) return 3;
+  if (s >= COMBO_THRESHOLDS[0]) return 2;
+  return 1;
+}
+
+function updateComboUI() {
+  const s = state.streak;
+  const mult = getComboMultiplier();
+
+  $('comboValue').textContent = s;
+  $('comboMult').textContent = `x${mult}`;
+  $('comboMult').className = 'combo-mult' + (mult >= 2 ? ` x${mult}` : '');
+
+  // Progress to next threshold
+  let nextThresh, prevThresh = 0;
+  if (s < COMBO_THRESHOLDS[0]) { nextThresh = COMBO_THRESHOLDS[0]; prevThresh = 0; }
+  else if (s < COMBO_THRESHOLDS[1]) { nextThresh = COMBO_THRESHOLDS[1]; prevThresh = COMBO_THRESHOLDS[0]; }
+  else if (s < COMBO_THRESHOLDS[2]) { nextThresh = COMBO_THRESHOLDS[2]; prevThresh = COMBO_THRESHOLDS[1]; }
+  else { nextThresh = s; prevThresh = s; }
+
+  const range = nextThresh - prevThresh;
+  const progress = range > 0 ? Math.min(100, Math.round((s - prevThresh) / range * 100)) : 100;
+  $('comboFill').style.width = progress + '%';
+
+  const bar = $('comboBar');
+  bar.classList.toggle('hot', mult >= 2 && mult < 4);
+  bar.classList.toggle('fire', mult >= 4);
+
+  if (mult >= 3) {
+    $('comboFill').style.background = 'var(--error)';
+  } else if (mult >= 2) {
+    $('comboFill').style.background = 'var(--warning)';
+  } else {
+    $('comboFill').style.background = 'var(--warning)';
+  }
+}
+
+// --- XP popup ---
+
+function showXpPopup(amount, x, y) {
+  const el = document.createElement('div');
+  el.className = 'xp-popup';
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  el.style.color = amount > 0 ? 'var(--success)' : 'var(--error)';
+  el.textContent = (amount > 0 ? '+' : '') + amount + ' XP';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1000);
+}
+
+// --- Confetti ---
+
+function launchConfetti() {
+  const canvas = $('confetti');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const particles = [];
+  const colors = ['#7c5cfc','#9d85fc','#22c55e','#f59e0b','#ef4444','#60a5fa','#f472b6'];
+
+  for (let i = 0; i < 80; i++) {
+    particles.push({
+      x: canvas.width / 2 + (Math.random() - 0.5) * 200,
+      y: canvas.height / 2,
+      vx: (Math.random() - 0.5) * 16,
+      vy: Math.random() * -14 - 4,
+      size: Math.random() * 8 + 4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rotation: Math.random() * 360,
+      rotSpeed: (Math.random() - 0.5) * 12,
+      life: 1,
+    });
+  }
+
+  let frame;
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let alive = false;
+
+    particles.forEach(p => {
+      p.x += p.vx;
+      p.vy += 0.3;
+      p.y += p.vy;
+      p.rotation += p.rotSpeed;
+      p.life -= 0.012;
+
+      if (p.life > 0) {
+        alive = true;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rotation * Math.PI / 180);
+        ctx.globalAlpha = p.life;
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size * 0.6);
+        ctx.restore();
+      }
+    });
+
+    if (alive) frame = requestAnimationFrame(animate);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  animate();
+}
+
+// --- Achievements ---
+
+function checkAchievements() {
+  let newlyUnlocked = [];
+
+  ACHIEVEMENTS.forEach(ach => {
+    if (!state.achievements.includes(ach.id) && ach.check(state)) {
+      state.achievements.push(ach.id);
+      newlyUnlocked.push(ach);
+    }
+  });
+
+  if (newlyUnlocked.length > 0) {
+    showAchievementToast(newlyUnlocked[0]);
+    if (newlyUnlocked.some(a => ['lvl5','lvl7','lvl10','streak25','streak50','total500'].includes(a.id))) {
+      launchConfetti();
+    }
+    renderAchievements();
+  }
+}
+
+function showAchievementToast(ach) {
+  $('toastIcon').textContent = ach.icon;
+  $('toastName').textContent = ach.name;
+  $('toastText').textContent = ach.desc;
+
+  const toast = $('toast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function renderAchievements() {
+  const grid = $('achGrid');
+  grid.innerHTML = '';
+  ACHIEVEMENTS.forEach(ach => {
+    const div = document.createElement('div');
+    div.className = 'achievement' + (state.achievements.includes(ach.id) ? ' unlocked' : '');
+    div.innerHTML = `<div class="ach-icon">${state.achievements.includes(ach.id) ? ach.icon : '🔒'}</div><div class="ach-name">${ach.name}</div>`;
+    div.title = ach.desc;
+    grid.appendChild(div);
+  });
+}
+
+// --- Op Stats panel ---
+
+function renderOpStats() {
+  const grid = $('statsGrid');
+  grid.innerHTML = '';
+
+  state.selectedOps.forEach(op => {
+    const s = getOpStat(op);
+    const acc = s.total > 0 ? Math.round(s.correct / s.total * 100) : 0;
+    const avg = s.total > 0 ? (s.totalTime / s.total).toFixed(1) : '-';
+    const lvl = state.levels[op];
+    const color = acc >= 80 ? 'var(--success)' : acc >= 50 ? 'var(--warning)' : 'var(--error)';
+
+    const div = document.createElement('div');
+    div.className = 'op-stat-card';
+    div.innerHTML = `
+      <div class="op-stat-name">
+        <span>${OPS[op].name}</span>
+        <span class="op-stat-lvl">רמה ${lvl}</span>
+      </div>
+      <div class="op-stat-bar"><div class="op-stat-bar-fill" style="width:${acc}%;background:${color}"></div></div>
+      <div class="op-stat-info">
+        <span>דיוק ${acc}%</span>
+        <span>${s.total} תרגילים</span>
+        <span>${avg}s ממוצע</span>
+      </div>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+// --- Question Generation ---
+
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function isTrivial(op, a, b, answer) {
+  // Filter out questions that are too obvious
+  if (answer === 0 && op !== 'sub') return true;
+  if (a === 0 || b === 0) return true;
+  if (a === 1 && (op === 'mul' || op === 'pow')) return true;
+  if (b === 1 && (op === 'mul' || op === 'div' || op === 'pow')) return true;
+  if (op === 'add' && a + b <= 3) return true;
+  if (op === 'sub' && a === b) return true;
+  if (op === 'sub' && a - b === 0) return true;
+  if (op === 'sub' && a <= 2) return true;
+  if (op === 'mul' && a * b <= 4) return true;
+  if (op === 'div' && a === b) return true;
+  if (op === 'add' && (a <= 1 || b <= 1)) return true;
+  return false;
+}
+
+function isDuplicate(text) {
+  const clean = text.replace(/<[^>]+>/g, '').trim();
+  return recentQuestions.includes(clean);
+}
+
+function trackQuestion(text) {
+  const clean = text.replace(/<[^>]+>/g, '').trim();
+  recentQuestions.push(clean);
+  if (recentQuestions.length > 15) recentQuestions.shift();
+}
+
+function genQuestion(op, level, attempts) {
+  attempts = attempts || 0;
+  if (attempts > 30) {
+    // Fallback: just give something reasonable
+    return { a: 7, b: 8, answer: 56, text: '7 <span class="op-symbol">×</span> 8', type: 'כפל', op, level };
+  }
+
+  let a, b, answer, text, type;
+  const originalOp = op;
+
+  if (op === 'mixed') {
+    const subOps = ['add','sub','mul','div','pct'];
+    op = subOps[rand(0, subOps.length - 1)];
+  }
+
+  switch(op) {
+    case 'add':
+      if (level <= 2) { a = rand(2, 10 * level); b = rand(2, 10 * level); }
+      else if (level <= 4) { a = rand(10, 50 * (level-1)); b = rand(10, 50 * (level-1)); }
+      else if (level <= 6) { a = rand(100, 500 * (level-3)); b = rand(100, 500 * (level-3)); }
+      else { a = rand(1000, 5000); b = rand(1000, 5000); }
+      answer = a + b;
+      text = `${a} <span class="op-symbol">+</span> ${b}`;
+      type = 'חיבור';
+      break;
+
+    case 'sub':
+      if (level <= 2) { a = rand(5, 15 * level); b = rand(2, Math.max(2, a - 2)); }
+      else if (level <= 4) { a = rand(20, 100 * (level-1)); b = rand(10, Math.max(10, a - 5)); }
+      else if (level <= 6) { a = rand(200, 1000 * (level-3)); b = rand(100, Math.max(100, a - 10)); }
+      else { a = rand(2000, 9000); b = rand(1000, Math.max(1000, a - 100)); }
+      answer = a - b;
+      text = `${a} <span class="op-symbol">−</span> ${b}`;
+      type = 'חיסור';
+      break;
+
+    case 'mul':
+      if (level <= 2) { a = rand(2, 5 * level); b = rand(2, 5 * level); }
+      else if (level <= 4) { a = rand(3, 12); b = rand(10, 20 * (level-2)); }
+      else if (level <= 6) { a = rand(10, 30 * (level-3)); b = rand(10, 30 * (level-3)); }
+      else { a = rand(20, 99); b = rand(20, 99); }
+      answer = a * b;
+      text = `${a} <span class="op-symbol">×</span> ${b}`;
+      type = 'כפל';
+      break;
+
+    case 'div':
+      if (level <= 2) { b = rand(2, 5 * level); answer = rand(2, 5 * level); a = b * answer; }
+      else if (level <= 4) { b = rand(3, 12); answer = rand(5, 20 * (level-2)); a = b * answer; }
+      else if (level <= 6) { b = rand(5, 25); answer = rand(10, 50); a = b * answer; }
+      else { b = rand(12, 50); answer = rand(10, 100); a = b * answer; }
+      text = `${a} <span class="op-symbol">÷</span> ${b}`;
+      type = 'חילוק';
+      break;
+
+    case 'pct': {
+      const pcts = level <= 2 ? [10,20,25,50] :
+                   level <= 4 ? [5,10,15,20,25,30,50,75] :
+                   level <= 6 ? [5,10,12,15,20,25,30,40,50,60,75] :
+                                [3,5,8,10,12,15,20,25,30,35,40,45,50,60,75,85];
+      const bases = level <= 2 ? [20,40,50,100,200] :
+                    level <= 4 ? [50,80,100,120,150,200,250,300] :
+                    level <= 6 ? [60,100,120,150,200,250,300,400,500,800] :
+                                 [100,120,150,200,250,300,400,500,600,800,1000,1200];
+
+      let found = false;
+      for (let i = 0; i < 20; i++) {
+        const p = pcts[rand(0, pcts.length-1)];
+        const base = bases[rand(0, bases.length-1)];
+        const result = base * p / 100;
+        if (result === Math.floor(result) && result > 0) {
+          a = base; b = p; answer = result;
+          text = `<span class="op-symbol">${p}%</span> <span class="op-symbol">of</span> ${a}`;
+          found = true;
+          break;
+        }
+      }
+      if (!found) { a = 200; b = 25; answer = 50; text = `<span class="op-symbol">25%</span> <span class="op-symbol">of</span> 200`; }
+      type = 'אחוזים';
+      break;
+    }
+
+    case 'pow':
+      if (level <= 2) { a = rand(2, 6); b = 2; }
+      else if (level <= 4) { a = rand(2, 10); b = 2; }
+      else if (level <= 6) { a = rand(2, 8); b = rand(2, 3); }
+      else { a = rand(2, 12); b = rand(2, 4); }
+      answer = Math.pow(a, b);
+      text = `${a}<sup>${b}</sup>`;
+      type = 'חזקות';
+      break;
+
+    case 'sqrt': {
+      const roots = level <= 2 ? [4,9,16,25] :
+                    level <= 4 ? [4,9,16,25,36,49,64,81,100] :
+                    level <= 6 ? [4,9,16,25,36,49,64,81,100,121,144,169,196,225] :
+                                 [4,9,16,25,36,49,64,81,100,121,144,169,196,225,256,289,324,361,400,441,484,529,576,625];
+      a = roots[rand(0, roots.length-1)];
+      answer = Math.sqrt(a);
+      b = 0;
+      text = `√${a}`;
+      type = 'שורשים';
+      break;
+    }
+  }
+
+  // Check trivial / duplicate
+  if (isTrivial(op, a, b, answer) || isDuplicate(text)) {
+    return genQuestion(originalOp, level, attempts + 1);
+  }
+
+  return { a, b, answer, text, type, op: originalOp, level };
+}
+
+// --- UI ---
+
+function updateStats() {
+  $('totalStat').textContent = state.total;
+  $('correctStat').textContent = state.correct;
+  $('streakStat').textContent = state.streak;
+  $('accuracyStat').textContent = state.total > 0 ? Math.round(state.correct / state.total * 100) + '%' : '-';
+}
+
+function updateLevel() {
+  if (!current) return;
+  const op = current.op;
+  const lvl = state.levels[op];
+  const xp = state.xp[op];
+  const needed = XP_TO_LEVEL_UP(lvl);
+  $('levelNum').textContent = lvl;
+  $('levelFill').style.width = Math.min(100, Math.round(xp / needed * 100)) + '%';
+}
+
+function renderGameOps() {
+  const container = $('gameOps');
+  container.innerHTML = '';
+  state.selectedOps.forEach(op => {
+    const btn = document.createElement('button');
+    btn.className = 'op-btn';
+    btn.dataset.op = op;
+    btn.innerHTML = `${OPS[op].name} <span class="op-level">רמה ${state.levels[op]}</span>`;
+    container.appendChild(btn);
+  });
+}
+
+function highlightCurrentOp() {
+  if (!current) return;
+  $('gameOps').querySelectorAll('.op-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.op === current.op);
+  });
+}
+
+function setLocked(locked) {
+  isLocked = locked;
+  $('answerInput').disabled = locked;
+  $('submitBtn').disabled = locked;
+  $('skipBtn').disabled = locked;
+}
+
+function nextQuestion() {
+  const ops = state.selectedOps;
+  const op = ops[rand(0, ops.length - 1)];
+  const level = state.levels[op];
+  current = genQuestion(op, level);
+  trackQuestion(current.text);
+
+  $('questionType').textContent = current.type + ' · רמה ' + current.level;
+  $('questionText').innerHTML = current.text;
+  $('answerInput').value = '';
+  $('answerInput').className = 'answer-input';
+  $('feedback').textContent = '';
+  $('feedback').className = 'feedback';
+  $('questionCard').className = 'question-card pop';
+
+  setLocked(false);
+  updateLevel();
+  updateComboUI();
+  highlightCurrentOp();
+  $('answerInput').focus();
+
+  // Timer
+  clearInterval(timerInterval);
+  if (state.showTimer) {
+    $('timer').style.display = 'block';
+    timerStart = Date.now();
+    timerInterval = setInterval(() => {
+      $('timer').textContent = ((Date.now() - timerStart) / 1000).toFixed(1) + 's';
+    }, 100);
+  } else {
+    $('timer').style.display = 'none';
+    timerStart = Date.now(); // still track for speed achievements
+  }
+}
+
+function checkAnswer() {
+  if (isLocked) return;
+
+  const raw = $('answerInput').value.trim();
+  if (!raw) return;
+
+  const userAnswer = parseFloat(raw);
+  if (isNaN(userAnswer)) return;
+
+  setLocked(true);
+  clearInterval(timerInterval);
+  const timeSec = (Date.now() - timerStart) / 1000;
+  const time = timeSec.toFixed(1);
+
+  const isCorrect = Math.abs(userAnswer - current.answer) < 0.001;
+  const op = current.op;
+  const comboMult = getComboMultiplier();
+
+  state.total++;
+
+  // Track op stats
+  const os = getOpStat(op);
+  os.total++;
+  os.totalTime += timeSec;
+
+  if (isCorrect) {
+    state.correct++;
+    state.streak++;
+    state.wrongStreak[op] = 0;
+    os.correct++;
+
+    if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+
+    // Fast answer tracking
+    if (timeSec < 2) state.fastAnswers = (state.fastAnswers || 0) + 1;
+
+    // XP with combo multiplier
+    const xpGain = comboMult;
+    state.xp[op] += xpGain;
+
+    // XP popup
+    const rect = $('questionCard').getBoundingClientRect();
+    showXpPopup(xpGain, rect.left + rect.width / 2, rect.top);
+
+    // Level up
+    const needed = XP_TO_LEVEL_UP(state.levels[op]);
+    if (state.xp[op] >= needed && state.levels[op] < MAX_LEVEL) {
+      state.levels[op]++;
+      state.xp[op] = 0;
+      $('feedback').textContent = `עלית לרמה ${state.levels[op]} ב${OPS[op].name}!`;
+      renderGameOps();
+      launchConfetti();
+    } else {
+      const msgs = ['מצוין!', 'נכון!', 'יופי!', 'בול!', 'מדויק!'];
+      let fb = msgs[rand(0, msgs.length-1)];
+      if (state.showTimer) fb += ` (${time}s)`;
+      if (comboMult > 1) fb += ` x${comboMult}`;
+      $('feedback').textContent = fb;
+    }
+    $('feedback').className = 'feedback correct-fb';
+    $('answerInput').className = 'answer-input correct-input';
+    $('questionCard').className = 'question-card correct';
+
+    // Daily
+    checkDaily();
+    const wasDone = state.dailyCorrect >= DAILY_GOAL;
+    state.dailyCorrect++;
+    if (!wasDone && state.dailyCorrect >= DAILY_GOAL) {
+      state.dailyCompleted = (state.dailyCompleted || 0) + 1;
+    }
+    updateDailyUI();
+
+  } else {
+    state.streak = 0;
+    state.wrongStreak[op]++;
+    state.xp[op] = Math.max(0, state.xp[op] - 1);
+
+    const rect = $('questionCard').getBoundingClientRect();
+    showXpPopup(-1, rect.left + rect.width / 2, rect.top);
+
+    if (state.wrongStreak[op] >= WRONG_STREAK_TO_LEVEL_DOWN && state.levels[op] > 1) {
+      state.levels[op]--;
+      state.xp[op] = 0;
+      state.wrongStreak[op] = 0;
+      $('feedback').textContent = `התשובה: ${current.answer} | ירדת לרמה ${state.levels[op]}`;
+      renderGameOps();
+    } else {
+      $('feedback').textContent = `התשובה הנכונה: ${current.answer}`;
+    }
+    $('feedback').className = 'feedback wrong-fb';
+    $('answerInput').className = 'answer-input wrong-input';
+    $('questionCard').className = 'question-card wrong';
+  }
+
+  // History
+  state.history.unshift({
+    text: current.text.replace(/<[^>]+>/g, ''),
+    answer: current.answer,
+    userAnswer,
+    correct: isCorrect,
+    time,
+  });
+
+  addHistoryItem(state.history[0]);
+  updateStats();
+  updateLevel();
+  updateComboUI();
+  renderOpStats();
+  checkAchievements();
+  saveState();
+
+  setTimeout(() => nextQuestion(), isCorrect ? 800 : 2200);
+}
+
+function skipQuestion() {
+  if (isLocked) return;
+  setLocked(true);
+  clearInterval(timerInterval);
+  state.streak = 0;
+  $('feedback').textContent = `דילגת. התשובה: ${current.answer}`;
+  $('feedback').className = 'feedback wrong-fb';
+  updateComboUI();
+  saveState();
+  setTimeout(() => nextQuestion(), 1500);
+}
+
+function addHistoryItem(item) {
+  const div = document.createElement('div');
+  div.className = 'history-item ' + (item.correct ? 'h-correct' : 'h-wrong');
+  div.innerHTML = `
+    <span>${item.text} = ${item.answer}</span>
+    <span class="h-answer">${item.correct ? '✓' : item.userAnswer + ' ✗'} ${item.time}s</span>
+  `;
+  const list = $('historyList');
+  list.prepend(div);
+  if (list.children.length > 20) list.lastChild.remove();
+}
+
+// --- Events ---
+
+$('startOps').addEventListener('click', e => {
+  const btn = e.target.closest('.op-btn');
+  if (!btn) return;
+  btn.classList.toggle('active');
+});
+
+$('timerToggle').addEventListener('click', () => {
+  const t = $('timerToggle');
+  t.classList.toggle('active');
+  state.showTimer = t.classList.contains('active');
+});
+
+$('startBtn').addEventListener('click', () => {
+  const selected = [...$('startOps').querySelectorAll('.op-btn.active')].map(b => b.dataset.op);
+  if (selected.length === 0) { alert('בחר לפחות פעולה אחת'); return; }
+  state.selectedOps = selected;
+  saveState();
+
+  $('startScreen').style.display = 'none';
+  $('gameScreen').style.display = 'block';
+
+  updateStats();
+  renderGameOps();
+  renderAchievements();
+  renderOpStats();
+  updateDailyUI();
+  updateComboUI();
+  nextQuestion();
+});
+
+$('backBtn').addEventListener('click', () => {
+  clearInterval(timerInterval);
+  setLocked(false);
+  current = null;
+  $('gameScreen').style.display = 'none';
+  $('startScreen').style.display = 'block';
+});
+
+$('resetBtn').addEventListener('click', () => {
+  if (confirm('בטוח שאתה רוצה לאפס את כל ההתקדמות?')) {
+    localStorage.removeItem(SAVE_KEY);
+    state = defaultState();
+    recentQuestions = [];
+    updateStats();
+    renderGameOps();
+    renderAchievements();
+    renderOpStats();
+    updateDailyUI();
+    updateComboUI();
+    nextQuestion();
+  }
+});
+
+$('submitBtn').addEventListener('click', checkAnswer);
+$('skipBtn').addEventListener('click', skipQuestion);
+$('answerInput').addEventListener('keydown', e => { if (e.key === 'Enter') checkAnswer(); });
+
+$('answerInput').addEventListener('input', e => {
+  let val = e.target.value;
+  val = val.replace(/[^0-9.\-]/g, '');
+  if (val.indexOf('-') > 0) val = val[0] + val.slice(1).replace(/-/g, '');
+  const parts = val.split('.');
+  if (parts.length > 2) val = parts[0] + '.' + parts.slice(1).join('');
+  e.target.value = val;
+});
+
+// Toggle panels
+$('achToggle').addEventListener('click', () => {
+  $('achGrid').classList.toggle('collapsed');
+  $('achArrow').classList.toggle('open');
+});
+
+$('statsPanelToggle').addEventListener('click', () => {
+  $('statsGrid').classList.toggle('collapsed');
+  $('statsArrow').classList.toggle('open');
+});
+
+</script>
+</body>
+</html>
