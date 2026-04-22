@@ -698,6 +698,11 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
+  /* ===== Numpad ===== */
+  .numpad {
+    display: none;
+  }
+
   /* ===== Mobile-first compact strip ===== */
   .mobile-strip {
     display: none;
@@ -877,6 +882,95 @@
 
     /* XP popup smaller */
     .xp-popup { font-size: 1.1rem; }
+
+    /* Hide desktop submit/skip on mobile */
+    .answer-row .submit-btn,
+    .answer-row .skip-btn { display: none !important; }
+
+    .answer-row {
+      max-width: 100%;
+      gap: 0;
+    }
+
+    .answer-input {
+      width: 100%;
+      font-size: 1.8rem;
+      padding: 14px 12px;
+      border-radius: 14px;
+      caret-color: var(--primary);
+    }
+
+    /* Numpad */
+    .numpad {
+      display: grid !important;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      padding: 10px 12px;
+      padding-bottom: max(10px, env(safe-area-inset-bottom));
+      z-index: 50;
+    }
+
+    .numpad-key {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 1.4rem;
+      font-weight: 600;
+      border-radius: 12px;
+      padding: 14px 0;
+      cursor: pointer;
+      transition: background 0.1s, transform 0.1s;
+      text-align: center;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .numpad-key:active {
+      background: var(--card-hover);
+      transform: scale(0.95);
+    }
+
+    .numpad-key.key-backspace {
+      font-size: 1.3rem;
+      color: var(--text-dim);
+    }
+
+    .numpad-key.key-submit {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      border-color: transparent;
+      color: #fff;
+      font-size: 1.1rem;
+    }
+
+    .numpad-key.key-submit:active {
+      opacity: 0.85;
+    }
+
+    .numpad-key.key-submit.disabled {
+      opacity: 0.4;
+    }
+
+    .numpad-key.key-skip {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--text-dim);
+      font-size: 0.95rem;
+    }
+
+    .numpad-key.key-skip:active {
+      background: var(--card);
+    }
+
+    /* Add bottom padding so content doesn't hide behind numpad */
+    #gameScreen {
+      padding-bottom: 280px;
+    }
   }
 
   @media (max-width: 360px) {
@@ -891,6 +985,24 @@
 <body>
 
 <canvas id="confetti"></canvas>
+
+<!-- Numpad (shown on mobile only via CSS) -->
+<div class="numpad" id="numpad">
+  <button class="numpad-key" data-key="1">1</button>
+  <button class="numpad-key" data-key="2">2</button>
+  <button class="numpad-key" data-key="3">3</button>
+  <button class="numpad-key" data-key="4">4</button>
+  <button class="numpad-key" data-key="5">5</button>
+  <button class="numpad-key" data-key="6">6</button>
+  <button class="numpad-key" data-key="7">7</button>
+  <button class="numpad-key" data-key="8">8</button>
+  <button class="numpad-key" data-key="9">9</button>
+  <button class="numpad-key" data-key=".">.</button>
+  <button class="numpad-key" data-key="0">0</button>
+  <button class="numpad-key key-backspace" data-key="backspace">⌫</button>
+  <button class="numpad-key key-skip" data-key="skip">דלג</button>
+  <button class="numpad-key key-submit" data-key="submit" style="grid-column: span 2;">שלח</button>
+</div>
 
 <!-- Achievement Toast -->
 <div class="toast" id="toast">
@@ -1739,6 +1851,7 @@ $('startBtn').addEventListener('click', () => {
 
   $('startScreen').style.display = 'none';
   $('gameScreen').style.display = 'block';
+  updateNumpadVisibility();
 
   updateStats();
   renderGameOps();
@@ -1756,6 +1869,7 @@ $('backBtn').addEventListener('click', () => {
   current = null;
   $('gameScreen').style.display = 'none';
   $('startScreen').style.display = 'block';
+  updateNumpadVisibility();
 });
 
 $('resetBtn').addEventListener('click', () => {
@@ -1811,15 +1925,70 @@ function updateMobileStrip() {
   $('mDailyNum').textContent = Math.min(state.dailyCorrect, DAILY_GOAL) + '/' + DAILY_GOAL;
 }
 
-// Scroll input into view when keyboard opens on mobile
-if (window.visualViewport) {
-  window.visualViewport.addEventListener('resize', () => {
-    const input = $('answerInput');
-    if (document.activeElement === input) {
-      setTimeout(() => input.scrollIntoView({ block: 'center', behavior: 'smooth' }), 100);
-    }
+// --- Numpad (mobile) ---
+const isMobile = window.matchMedia('(max-width: 600px)').matches;
+
+if (isMobile) {
+  // Prevent system keyboard from opening
+  $('answerInput').setAttribute('readonly', '');
+  $('answerInput').addEventListener('focus', () => {
+    $('answerInput').blur();
   });
 }
+
+// Show/hide numpad based on game screen
+function updateNumpadVisibility() {
+  if (!isMobile) return;
+  const showing = $('gameScreen').style.display !== 'none';
+  $('numpad').style.display = showing ? 'grid' : 'none';
+}
+
+$('numpad').addEventListener('click', e => {
+  const btn = e.target.closest('.numpad-key');
+  if (!btn) return;
+  const key = btn.dataset.key;
+  const input = $('answerInput');
+
+  if (key === 'submit') {
+    checkAnswer();
+    return;
+  }
+
+  if (key === 'skip') {
+    skipQuestion();
+    return;
+  }
+
+  if (isLocked) return;
+
+  if (key === 'backspace') {
+    input.value = input.value.slice(0, -1);
+    return;
+  }
+
+  let val = input.value;
+
+  // Dot: only one allowed
+  if (key === '.' && val.includes('.')) return;
+
+  // Minus: only at start (no negative numbers in this app, but just in case)
+  if (key === '-') {
+    if (val.length === 0) { input.value = '-'; }
+    return;
+  }
+
+  input.value = val + key;
+});
+
+// Update numpad submit button disabled state
+const origSetLocked = setLocked;
+setLocked = function(locked) {
+  origSetLocked(locked);
+  const submitKey = document.querySelector('.numpad-key.key-submit');
+  const skipKey = document.querySelector('.numpad-key.key-skip');
+  if (submitKey) submitKey.classList.toggle('disabled', locked);
+  if (skipKey) skipKey.classList.toggle('disabled', locked);
+};
 
 // Toggle panels
 $('achToggle').addEventListener('click', () => {
