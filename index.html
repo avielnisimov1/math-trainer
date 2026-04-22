@@ -698,48 +698,193 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
+  /* ===== Mobile-first compact strip ===== */
+  .mobile-strip {
+    display: none;
+  }
+
   /* ===== Mobile ===== */
-  @media (max-width: 500px) {
-    .container { padding: 10px; }
-    .header { padding: 16px 0 10px; }
-    .header h1 { font-size: 1.5rem; }
+  @media (max-width: 600px) {
+    .container { padding: 8px; }
 
-    .stats-bar { grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 12px; }
-    .stat-card { padding: 10px 4px; border-radius: 10px; }
-    .stat-card .value { font-size: 1.2rem; }
-    .stat-card .label { font-size: 0.65rem; }
+    /* Hide desktop elements on mobile */
+    .stats-bar,
+    .combo-bar,
+    .daily-section,
+    .level-bar,
+    #gameOps,
+    .game-header-wrap .header { display: none !important; }
 
-    .combo-bar { padding: 8px 12px; margin-bottom: 12px; gap: 8px; }
-    .combo-value { font-size: 0.95rem; }
+    /* Show compact mobile strip */
+    .mobile-strip {
+      display: flex !important;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 0;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
 
-    .level-bar { padding: 10px 14px; margin-bottom: 12px; gap: 10px; }
-    .op-selector { gap: 6px; margin-bottom: 12px; }
-    .op-btn { padding: 6px 12px; font-size: 0.8rem; border-radius: 8px; }
+    .m-stat {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
 
-    .question-card { padding: 28px 16px; margin-bottom: 14px; border-radius: 14px; }
-    .question-text { font-size: 2rem; margin-bottom: 24px; }
-    .answer-input { font-size: 1.4rem; padding: 10px; border-radius: 10px; }
-    .submit-btn { padding: 12px 18px; font-size: 1rem; border-radius: 10px; }
-    .skip-btn { padding: 12px 12px; font-size: 0.8rem; }
+    .m-stat .m-val {
+      font-weight: 700;
+      color: var(--primary-light);
+      font-size: 0.85rem;
+    }
 
-    .feedback { font-size: 1rem; min-height: 28px; margin-bottom: 10px; }
-    .history-list { max-height: 150px; }
-    .history-item { padding: 8px 12px; font-size: 0.8rem; }
+    .m-stat.m-streak .m-val { color: var(--warning); }
+    .m-stat.m-combo .m-val { color: var(--error); }
+    .m-stat.m-daily .m-val { color: var(--success); }
+    .m-stat.m-acc .m-val { color: var(--success); }
 
-    .achievements-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
-    .achievement { padding: 8px; }
-    .achievement .ach-icon { font-size: 1.2rem; }
+    .m-stat.m-lvl {
+      margin-inline-start: auto;
+      border-color: var(--primary);
+      color: var(--primary-light);
+    }
 
-    .daily-section { padding: 12px 14px; margin-bottom: 16px; }
+    .m-stat.m-lvl .m-val { color: var(--primary-light); }
 
+    /* Top bar compact */
+    .top-bar { margin-bottom: 4px; }
+    .back-btn, .reset-btn { padding: 5px 10px; font-size: 0.8rem; }
+
+    /* Question card: the hero */
+    .question-card {
+      padding: 24px 16px 28px;
+      margin-bottom: 10px;
+      border-radius: 16px;
+      min-height: 0;
+    }
+
+    .question-type {
+      font-size: 0.75rem;
+      margin-bottom: 8px;
+    }
+
+    .question-text {
+      font-size: 2.2rem;
+      margin-bottom: 22px;
+      line-height: 1.2;
+    }
+
+    .answer-row {
+      gap: 8px;
+      max-width: 100%;
+    }
+
+    .answer-input {
+      font-size: 1.6rem;
+      padding: 12px 8px;
+      border-radius: 12px;
+      min-width: 0;
+    }
+
+    .submit-btn {
+      padding: 12px 20px;
+      font-size: 1.05rem;
+      border-radius: 12px;
+      white-space: nowrap;
+    }
+
+    .skip-btn {
+      padding: 12px 14px;
+      font-size: 0.8rem;
+      border-radius: 12px;
+    }
+
+    /* Feedback */
+    .feedback {
+      font-size: 1rem;
+      min-height: 24px;
+      margin-bottom: 8px;
+    }
+
+    /* Panels: ultra compact */
+    .stats-panel, .achievements-section, .history-section { margin-top: 10px; }
+    .history-list { max-height: 120px; }
+    .history-item { padding: 6px 10px; font-size: 0.75rem; }
+    .history-item .h-answer { font-size: 0.7rem; }
+
+    .achievements-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 6px; }
+    .achievement { padding: 6px; }
+    .achievement .ach-icon { font-size: 1.1rem; margin-bottom: 2px; }
+    .achievement .ach-name { font-size: 0.65rem; }
+
+    .stats-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px; }
+    .op-stat-card { padding: 8px; }
+    .op-stat-card .op-stat-name { font-size: 0.75rem; }
+    .op-stat-card .op-stat-info { font-size: 0.65rem; }
+
+    /* Daily compact inline */
+    .m-daily-bar {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--card);
+      border: 1px solid rgba(124,92,252,0.25);
+      border-radius: 8px;
+      padding: 6px 10px;
+      margin-top: 2px;
+    }
+
+    .m-daily-label { font-size: 0.7rem; color: var(--primary-light); white-space: nowrap; }
+    .m-daily-prog {
+      flex: 1;
+      height: 5px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .m-daily-prog-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+      border-radius: 3px;
+      transition: width 0.4s;
+    }
+    .m-daily-num { font-size: 0.7rem; color: var(--text-dim); direction: ltr; white-space: nowrap; }
+
+    /* Start screen mobile */
+    .start-screen { padding: 24px 12px; }
+    .start-screen .header { padding: 20px 0 14px; }
+    .start-screen .header h1 { font-size: 1.6rem; }
     .start-btn { font-size: 1.1rem; padding: 14px 40px; width: 100%; max-width: 300px; }
+    .start-screen .op-btn { padding: 8px 14px; font-size: 0.85rem; }
+
+    /* Toast on mobile */
+    .toast {
+      top: 10px;
+      padding: 10px 16px;
+      border-radius: 12px;
+      max-width: 90vw;
+    }
+    .toast .toast-icon { font-size: 1.3rem; }
+    .toast .toast-text { font-size: 0.8rem; }
+    .toast .toast-name { font-size: 0.85rem; }
+
+    /* XP popup smaller */
+    .xp-popup { font-size: 1.1rem; }
   }
 
   @media (max-width: 360px) {
-    .question-text { font-size: 1.6rem; }
-    .answer-input { font-size: 1.2rem; }
-    .stats-bar { grid-template-columns: repeat(2, 1fr); }
-    .answer-row { gap: 8px; }
+    .question-text { font-size: 1.8rem; }
+    .answer-input { font-size: 1.3rem; padding: 10px 6px; }
+    .submit-btn { padding: 10px 16px; font-size: 1rem; }
+    .skip-btn { padding: 10px 10px; }
+    .m-stat { padding: 4px 7px; font-size: 0.7rem; }
   }
 </style>
 </head>
@@ -792,6 +937,20 @@
     <div class="top-bar">
       <button class="back-btn" id="backBtn">חזרה</button>
       <button class="reset-btn" id="resetBtn">איפוס</button>
+    </div>
+
+    <!-- Mobile compact strip (hidden on desktop, shown on mobile) -->
+    <div class="mobile-strip" id="mobileStrip">
+      <div class="m-stat"><span class="m-val" id="mTotal">0</span> תרגילים</div>
+      <div class="m-stat m-acc"><span class="m-val" id="mAcc">-</span></div>
+      <div class="m-stat m-streak"><span class="m-val" id="mStreak">0</span> רצף</div>
+      <div class="m-stat m-combo" id="mCombo" style="display:none;"><span class="m-val" id="mComboVal">x2</span></div>
+      <div class="m-stat m-lvl">רמה <span class="m-val" id="mLevel">1</span></div>
+      <div class="m-daily-bar" id="mDailyBar">
+        <span class="m-daily-label">יומי</span>
+        <div class="m-daily-prog"><div class="m-daily-prog-fill" id="mDailyFill" style="width:0%"></div></div>
+        <span class="m-daily-num" id="mDailyNum">0/20</span>
+      </div>
     </div>
 
     <div class="stats-bar">
@@ -1400,6 +1559,7 @@ function nextQuestion() {
   setLocked(false);
   updateLevel();
   updateComboUI();
+  updateMobileStrip();
   highlightCurrentOp();
   $('answerInput').focus();
 
@@ -1524,6 +1684,7 @@ function checkAnswer() {
   updateStats();
   updateLevel();
   updateComboUI();
+  updateMobileStrip();
   renderOpStats();
   checkAchievements();
   saveState();
@@ -1539,6 +1700,7 @@ function skipQuestion() {
   $('feedback').textContent = `דילגת. התשובה: ${current.answer}`;
   $('feedback').className = 'feedback wrong-fb';
   updateComboUI();
+  updateMobileStrip();
   saveState();
   setTimeout(() => nextQuestion(), 1500);
 }
@@ -1584,6 +1746,7 @@ $('startBtn').addEventListener('click', () => {
   renderOpStats();
   updateDailyUI();
   updateComboUI();
+  updateMobileStrip();
   nextQuestion();
 });
 
@@ -1622,6 +1785,41 @@ $('answerInput').addEventListener('input', e => {
   if (parts.length > 2) val = parts[0] + '.' + parts.slice(1).join('');
   e.target.value = val;
 });
+
+// --- Mobile strip ---
+function updateMobileStrip() {
+  $('mTotal').textContent = state.total;
+  $('mStreak').textContent = state.streak;
+  $('mAcc').textContent = state.total > 0 ? Math.round(state.correct / state.total * 100) + '%' : '-';
+
+  const mult = getComboMultiplier();
+  if (mult > 1) {
+    $('mCombo').style.display = '';
+    $('mComboVal').textContent = 'x' + mult;
+  } else {
+    $('mCombo').style.display = 'none';
+  }
+
+  if (current) {
+    $('mLevel').textContent = state.levels[current.op];
+  }
+
+  // Daily
+  checkDaily();
+  const pct = Math.min(100, Math.round(state.dailyCorrect / DAILY_GOAL * 100));
+  $('mDailyFill').style.width = pct + '%';
+  $('mDailyNum').textContent = Math.min(state.dailyCorrect, DAILY_GOAL) + '/' + DAILY_GOAL;
+}
+
+// Scroll input into view when keyboard opens on mobile
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', () => {
+    const input = $('answerInput');
+    if (document.activeElement === input) {
+      setTimeout(() => input.scrollIntoView({ block: 'center', behavior: 'smooth' }), 100);
+    }
+  });
+}
 
 // Toggle panels
 $('achToggle').addEventListener('click', () => {
