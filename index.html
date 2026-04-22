@@ -1036,6 +1036,19 @@
       </div>
     </div>
 
+    <div style="text-align: right; max-width: 400px; margin: 0 auto 20px;">
+      <p style="color: var(--text-dim); margin-bottom: 10px; font-size: 0.95rem;">רמת התחלה:</p>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;">
+        <button class="op-btn" data-level="1">1 - קל</button>
+        <button class="op-btn active" data-level="0">אוטומטי</button>
+        <button class="op-btn" data-level="3">3</button>
+        <button class="op-btn" data-level="5">5</button>
+        <button class="op-btn" data-level="7">7 - קשה</button>
+        <button class="op-btn" data-level="10">10 - מקסימום</button>
+      </div>
+      <div id="startLevelOps"></div>
+    </div>
+
     <div class="settings-row">
       <label class="setting-toggle active" id="timerToggle">
         <input type="checkbox" checked> טיימר
@@ -1848,6 +1861,15 @@ $('startBtn').addEventListener('click', () => {
   const selected = [...$('startOps').querySelectorAll('.op-btn.active')].map(b => b.dataset.op);
   if (selected.length === 0) { alert('בחר לפחות פעולה אחת'); return; }
   state.selectedOps = selected;
+
+  // Apply chosen start level
+  if (chosenStartLevel > 0) {
+    selected.forEach(op => {
+      state.levels[op] = chosenStartLevel;
+      state.xp[op] = 0;
+    });
+  }
+
   saveState();
 
   $('startScreen').style.display = 'none';
@@ -1878,14 +1900,28 @@ $('resetBtn').addEventListener('click', () => {
     localStorage.removeItem(SAVE_KEY);
     state = defaultState();
     recentQuestions = [];
+    $('historyList').innerHTML = '';
     updateStats();
     renderGameOps();
     renderAchievements();
     renderOpStats();
     updateDailyUI();
     updateComboUI();
+    updateMobileStrip();
     nextQuestion();
   }
+});
+
+// --- Level selector on start screen ---
+const levelBtns = document.querySelectorAll('[data-level]');
+let chosenStartLevel = 0; // 0 = auto (keep saved levels)
+
+levelBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    levelBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    chosenStartLevel = parseInt(btn.dataset.level);
+  });
 });
 
 $('submitBtn').addEventListener('click', checkAnswer);
