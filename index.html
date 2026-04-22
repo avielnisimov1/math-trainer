@@ -901,7 +901,7 @@
     }
 
     /* Numpad */
-    .numpad {
+    .numpad.active {
       display: grid !important;
       grid-template-columns: repeat(3, 1fr);
       gap: 8px;
@@ -1938,9 +1938,8 @@ if (isMobile) {
 
 // Show/hide numpad based on game screen
 function updateNumpadVisibility() {
-  if (!isMobile) return;
   const showing = $('gameScreen').style.display !== 'none';
-  $('numpad').style.display = showing ? 'grid' : 'none';
+  $('numpad').classList.toggle('active', showing);
 }
 
 $('numpad').addEventListener('click', e => {
